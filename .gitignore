@@ -1,0 +1,8 @@
+# Cache or vsCode file
+__pycache__/
+.vscode/
+
+# Save folder
+save/
+savetab/
+tmp_html/
