@@ -15,3 +15,4 @@ if __name__ == "__main__":
     install("validators")
     install("wget")
     install("selenium")
+    install("python-whois")

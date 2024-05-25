@@ -1,5 +1,6 @@
 import requests
 import tkinter as tk
+import winsound
 
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -18,7 +19,7 @@ class InfoScrap(NamedTuple):
     company_name: str
     domain: str
     networkScrap: NetworkScrap | None
-    emailPatern: str | None
+    emailPatern: str
     email : EmailScrap | None
 
 class Queue:
@@ -29,13 +30,13 @@ class Queue:
 
     def enqueue(self, item):
         if self.is_full():
-            return None
+            return
         self.queue.append(item)
         self.pointer += 1
 
-    def dequeue(self):
+    def dequeue(self)->str:
         if self.is_empty():
-            return None
+            return ""
         self.pointer -= 1
         return self.queue.pop(0)
     
@@ -115,8 +116,8 @@ def scrap(url:str, number:int)->None:
 
     fillQueue(companyNameQueue, companyDomainQueue, url, index, pageCounter, size)
 
-    companyNameQueue.display()
-    companyDomainQueue.display()
+    #companyNameQueue.display()
+    #companyDomainQueue.display()
     
     """
     Now we have all the informations needed to scrap the companies, we will start to search for the emails of the companies
@@ -129,7 +130,11 @@ def scrap(url:str, number:int)->None:
     """
     wb = Workbook()
     ws = wb.active
+
+    assert ws is not None
     ws.title = "Companies"
+
+    assert not isinstance(ws, (ReadOnlyWorksheet, Chartsheet))
     ws.append(["Nom de l'entreprise", "Nom de Domain", "Page de Contact", "Facebook", "Twitter", "Linkedin", "Email", "Score du mail", "Pattern de l'email"])
 
     """
@@ -137,13 +142,13 @@ def scrap(url:str, number:int)->None:
     I also use a csv file to store the informations of the companies, because it's easier to read and to use
     but also can be modified with a text editor
     """
-    csvFile = open(f"{csvPath}/companies.csv", "w")
+    csvFile = open(f"{csvPath}/companies.csv", "w", encoding="utf-8")
     csvFile.write("Nom de l'entreprise, Nom de Domain, Page de Contact, Facebook, Twitter, Linkedin, Email, Score du mail, Pattern de l'email\n")
 
     data:"list[InfoScrap]" = [] 
     while(not companyNameQueue.is_empty()):
-        company_name = companyNameQueue.dequeue()
-        domain = companyDomainQueue.dequeue()
+        company_name:str = companyNameQueue.dequeue()
+        domain:str = companyDomainQueue.dequeue()
         networkScrap = companyNetwork(domain)
 
 
@@ -160,14 +165,14 @@ def scrap(url:str, number:int)->None:
         try:
             pattern = responseData['data']['pattern']
         except (IndexError, KeyError):
-            pattern = None
+            pattern = "Non disponible"
 
         try:
             email = responseData['data']['emails'][0]['value']
             score = 0
         except (IndexError, KeyError):
             emailScrap = None
-        else: emailScrap = EmailScrap(email, score, pattern)
+        else: emailScrap = EmailScrap(email, score)
 
         if not pattern and not emailScrap:
             print(f"Email not found for {company_name}")
@@ -177,23 +182,31 @@ def scrap(url:str, number:int)->None:
     for row in data:
         email = row.email
         if email is None:
-            email = "Non disponible"
+            mail = "Non disponible"
             score = "Score non disponible"
         else: 
-            email = email.email
-            score = email.score
+            mail = email.email
+            score = email.score 
 
-        if row.networkScrap is not None:
-            if row.networkScrap.contactPage is None:
-                row.networkScrap.contactPage = "Non disponible"
-            if row.networkScrap.facebook is None:
-                row.networkScrap.facebook = "Non disponible"
-            if row.networkScrap.twitter is None:
-                row.networkScrap.twitter = "Non disponible"
-            if row.networkScrap.linkedin is None:
-                row.networkScrap.linkedin = "Non disponible"
-        ws.append([row.company_name, row.domain, row.networkScrap.contactPage, row.networkScrap.facebook, row.networkScrap.twitter, row.networkScrap.linkedin, email, score, row.emailPatern])
-        csvFile.write(f"{row.company_name}, {row.domain}, {row.networkScrap.contactPage}, {row.networkScrap.facebook}, {row.networkScrap.twitter}, {row.networkScrap.linkedin}, {email}, {score}, {row.emailPatern}\n")
+        network = row.networkScrap
+        if network is None:
+            contactPage = "Non disponible"
+            facebook = "Non disponible"
+            twitter = "Non disponible"
+            linkedin = "Non disponible"
+        else: 
+            if network.contactPage is None: contactPage = "Non disponible"
+            else: contactPage = network.contactPage
+            if network.facebook is None: facebook = "Non disponible"
+            else: facebook = network.facebook
+            if network.twitter is None: twitter = "Non disponible"
+            else: twitter = network.twitter
+            if network.linkedin is None: linkedin = "Non disponible"
+            else: linkedin = network.linkedin
+        
+
+        ws.append([row.company_name, row.domain, contactPage, facebook, twitter, linkedin, mail, score, row.emailPatern])
+        csvFile.write(f"{row.company_name}, {row.domain}, {contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
     
     wb.save(f"{tabPath}/companies.xlsx")
     csvFile.close()
@@ -251,12 +264,18 @@ def fillQueue(nameQueue: Queue, domainQueue: Queue, url:str, index:int, pageCoun
             index = (index+1)%250
             continue
         domain = domainHtmlElement.text
+
+        domain:str = domainHtmlElement.find('a').text # type: ignore
         
-        domain = domainHtmlElement.find('a').text
-        
-        if domainHtmlElement is None or domain in domainQueue.queue:
+        if not "http://" in domain: Tmpdomain = "http://" + domain
+        elif not "https://" in domain : Tmpdomain = "https://"+ domain
+
+        if domain in domainQueue.queue or not verifDNS(domain, Tmpdomain):
             index = (index+1)%250
             continue
+            
+
+        print(domain + " who passed the verifDNS")
         """
         The Company name is in the h3 tag in the company page, so we need to get the text in the tag and add it in the queue
         When we add the company name in the queue, we need to add the domain in the domain queue too and then we can pass to the next company
@@ -296,7 +315,7 @@ Some personal search can be needed to find the informations of the company,if th
 
 TO-DO: Find a solution for page like "https://cdiscount.com" where i can't scrap any informations
 """
-def companyNetwork(domain:str)->NetworkScrap:
+def companyNetwork(domain:str)->"NetworkScrap|None":
     return findNetwork(domain)
 
 

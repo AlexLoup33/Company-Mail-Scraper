@@ -1,18 +1,24 @@
 import requests
 import validators
-import socket
+import whois
 
+from pathlib import Path
 from bs4 import BeautifulSoup
 from typing import NamedTuple
 from selenium import webdriver
 
 class NetworkScrap(NamedTuple):
-    contactPage: str
-    facebook: str
-    twitter: str
-    linkedin: str
+    contactPage: str | None
+    facebook: str | None
+    twitter: str | None
+    linkedin: str | None
 
-def findNetwork(url:str)->"NetworkScrap":
+tmpPath = Path(__file__).parent.joinpath("tmp_html")
+
+if not tmpPath.exists():
+    tmpPath.mkdir()
+
+def findNetwork(url:str)->"NetworkScrap|None":
     """
     Get the html page of the url and scrap the page to find the network of the company
     The function will try to find the contact page, Facebook, Twitter and LinkedIn of the company
@@ -21,8 +27,8 @@ def findNetwork(url:str)->"NetworkScrap":
     Must also check if the url contain https or http, if not, the function will add it because
     requests need it to work properly.
     """
-    if not url.startswith("www"):
-        url = "www." + url
+    domain = url
+
     if not (url.startswith("http") or url.startswith("https")):
         if isValidPage("https://" + url):
             url = "https://" + url
@@ -30,11 +36,16 @@ def findNetwork(url:str)->"NetworkScrap":
             url = "http://" + url
         else:
             assert("The url is not valid, please check the url manually")
-
-    if not isValidPage(url):
+    
+    if not verifDNS(domain, url):
         print("The domain is not valid, please check the url manually")
         return None
-    response = requests.get(url)
+
+    try:
+        response = requests.get(url)
+    except Exception as e:
+        print(f"Error, DNS Failed : {e}")
+        return None
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -83,20 +94,21 @@ def findNetwork(url:str)->"NetworkScrap":
     print(f"LinkedIn: {linkedin}")
 
     looped: bool = False
+    """
     while (not facebook and not twitter and not linkedin):
         driver = webdriver.Chrome()
         driver.get(url)
 
         source_page = driver.page_source
-        with open('tmp_html/'+getCompanyName(url)+'.html', 'w') as f:
+        with open('tmp_html/'+getCompanyName(url)+'.html', 'w', encoding="utf-8") as f:
             f.write(source_page)
     
         driver.quit()
 
-        """
+        
         The html page is already saved in the tmp_html folder, now we open the file and retry
         to find the informations desired (hope i found lmao)
-        """
+    
 
         with open('tmp_html/'+getCompanyName(url)+'.html', 'r') as f:
             soup = BeautifulSoup(f, 'html.parser')
@@ -118,7 +130,8 @@ def findNetwork(url:str)->"NetworkScrap":
         if looped or (facebook or twitter or linkedin):
             break
         looped = True
-    
+    """
+
     print("Post traitement")
     print(f"Contact page: {contactPage}")
     print(f"Facebook: {facebook}")
@@ -158,7 +171,7 @@ def isValidPage(url:str)->bool:
     try :
         ip = validators.url(url)
         return True
-    except validators.ValidationFailure:
+    except:
         return False
 
 
@@ -172,17 +185,27 @@ def getCompanyName(url:str)->str:
     return url.split(".")[0]
 
 
-def verifDNS(domain:str)->bool:
+def verifDNS(domain:str, url:str)->bool:
+    """
+    Check if the domain is still online by verifying the DNS of the domain
+    If the domain is not online, the function will return false
+    """
     try:
-        ip = socket.gethostbyname(domain)
-        return True
-    except socket.gaierror:
+        response = requests.get(url)
+        w = whois.whois(domain)
+        if w.domain_name:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print("VerifDNS error: DNS not found")
         return False
 
 
 def main():
-    url = "www.cdiscount.com"
-    findNetwork(url)
+    url = "www.jadelma.com"
+    network = findNetwork(url)
+    print(network)
 
 if __name__ == "__main__":
     main()
