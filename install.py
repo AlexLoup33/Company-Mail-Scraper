@@ -16,3 +16,4 @@ if __name__ == "__main__":
     install("wget")
     install("selenium")
     install("python-whois")
+    install("customtkinter")

@@ -94,7 +94,7 @@ def findNetwork(url:str)->"NetworkScrap|None":
     print(f"LinkedIn: {linkedin}")
 
     looped: bool = False
-    """
+
     while (not facebook and not twitter and not linkedin):
         driver = webdriver.Chrome()
         driver.get(url)
@@ -105,10 +105,10 @@ def findNetwork(url:str)->"NetworkScrap|None":
     
         driver.quit()
 
-        
+        """
         The html page is already saved in the tmp_html folder, now we open the file and retry
         to find the informations desired (hope i found lmao)
-    
+        """
 
         with open('tmp_html/'+getCompanyName(url)+'.html', 'r') as f:
             soup = BeautifulSoup(f, 'html.parser')
@@ -130,13 +130,12 @@ def findNetwork(url:str)->"NetworkScrap|None":
         if looped or (facebook or twitter or linkedin):
             break
         looped = True
-    """
 
-    print("Post traitement")
+    print(f"Traitement de la page {url} terminé.")
     print(f"Contact page: {contactPage}")
     print(f"Facebook: {facebook}")
     print(f"Twitter: {twitter}")
-    print(f"LinkedIn: {linkedin}")
+    print(f"LinkedIn: {linkedin}", end="\n\n")
 
     return NetworkScrap(contactPage, facebook, twitter, linkedin)
 
@@ -180,6 +179,8 @@ def getCompanyName(url:str)->str:
     Only get the name of the company from the url by removing the extension and the "www." is it's present
     Not essential but allow to make a clean name file for the copy of the /robots.txt of the company
     """
+    if "https://" in url:
+        url = url.replace("https://", "")
     if "www." in url:
         return url.split(".")[1]
     return url.split(".")[0]
