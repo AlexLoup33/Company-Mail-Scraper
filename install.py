@@ -1,3 +1,5 @@
+__author__ = "Lou-Poueyou Alexandre | github.com/AlexLoup33"
+
 import pip
 
 def install(package):
@@ -11,6 +13,8 @@ if __name__ == "__main__":
     install("openpyxl")
     install("requests")
     install("tk")
+    install("customtkinter")
+    install("pillow")
     install("aiohttp")
     install("validators")
     install("wget")

@@ -1,4 +1,4 @@
-__author__ = "AlexLoup33 | github.com/AlexLoup33"
+__author__ = "Lou-Poueyou Alexandre | github.com/AlexLoup33"
 
 import requests
 
@@ -18,7 +18,18 @@ class EmailScrap(NamedTuple):
 class InfoScrap(NamedTuple):
     company_name: str
     domain: str
+    creationDate: str | None
     networkScrap: NetworkScrap | None
+    emailPatern: str
+    email : EmailScrap | None
+
+class ActivityInfoScrap(NamedTuple):
+    companyName: str
+    domain: str
+    creationDate: str
+    departement: str
+    activity : str
+    NetworkScrap: NetworkScrap | None
     emailPatern: str
     email : EmailScrap | None
 
@@ -52,112 +63,6 @@ class Queue:
 
 api_key = "d4d29913091c9954368733ea3f29bbced2a8c63e"
 
-departementLinksSorted = {
-    'Ain': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/ain-rdep/", 'Aisne': "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/aisne-rdep/", 
-    'Allier':"https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/allier-rdep/", 'Alpes de Haute Provence' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/alpes-de-haute-provence-rdep/", 
-    'Alpes Maritimes': "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/alpes-maritimes-rdep/", 'Ardèche': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/ardeche-rdep/", 
-    'Ardennes' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/ardennes-rdep/", 'Aube': "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/aube-rdep/",
-    'Aude': "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/aude-rdep/", 'Aveyron' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/aveyron-rdep/", 
-    'Bas Rhin' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/bas-rhin-rdep/", 'Bouches du Rhone' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/bouches-du-rhone-rdep/", 
-    'Calvados': "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/calvados-rdep/", 'Cantal': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/cantal-rdep/",
-    'Cote D Armor': "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/cote-d-armor-rdep/", "Cote D'or": "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/cote-d-or-rdep/",
-    'Cher': "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/cher-rdep/", 'Charante' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/charente-rdep/",
-    'Charante Maritime': "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/charente-maritime-rdep/", 'Correze' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/correze-rdep/",
-    'Corse du Sud': "https://www.verif.com/top/revenue-r0/france-rcoun/corse-rreg/corse-du-sud-rdep/", 'Creuse': "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/creuse-rdep/",
-    'Cote D Armor': "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/cote-d-armor-rdep/", 'Doubs': "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/doubs-rdep/",
-    'Drôme': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/drome-rdep/", 'Deux Sevres' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/deux-sevres-rdep/",
-    'Eure': "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/eure-rdep/", 'Eure et Loir': "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/eure-et-loir-rdep/",
-    'Essonne' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/essonne-rdep/", 'Finistère': "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/finistere-rdep/",
-    'Gard': "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/gard-rdep/", 'Gers' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/gers-rdep/",
-    'Gironde' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/gironde-rdep/", 'Haute Loire': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/-rdep/haute-loire-rdep/",
-    'Haute Corse': "https://www.verif.com/top/revenue-r0/france-rcoun/corse-rreg/haute-corse-rdep/", 'Haute Garonne': "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/haute-garonne-rdep/",
-    'Haute Marne' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/haute-marne-rdep/", 'Haute Saône': "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/haute-saone-rdep/",
-    'Haute Savoie': "https://verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/haute-savoie-rdep/", 'Haute Vienne': "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/haute-vienne-rdep/",
-    'Hautes Alpes': "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/hautes-alpes-rdep/", 'Hautes Pyrenees' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/hautes-pyrenees-rdep/",
-    'Haut Rhin' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/haut-rhin-rdep/", 'Hauts de Seine' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/hauts-de-seine-rdep/",
-    'Herault': "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/herault-rdep/", 'Ille et Vilaine': "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/ille-et-vilaine-rdep/",
-    'Indre': "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/indre-rdep/", 'Indre et Loire': "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/indre-et-loire-rdep/",
-    'Isère': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/isere-rdep/", 'Jura': "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/jura-rdep/",
-    'Landes': "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/landes-rdep/", 'Loire': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/loire-rdep/",
-    'Loire Atlantique' : "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/loire-atlantique-rdep/", 'Loiret': "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/loiret-rdep/",
-    'Loir et Cher': "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/loir-et-cher-rdep/", 'Lot': "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/lot-rdep/",
-    'Lot et Garonne' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/lot-et-garonne-rdep/", 'Lozere': "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/lozere-rdep/",
-    'Maine et Loire' : "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/maine-et-loire-rdep/", 'Manche': "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/manche-rdep/",
-    'Marne': "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/marne-rdep/", 'Mayenne': "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/mayenne-rdep/",
-    'Meurthe et Moselle' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/meurthe-et-moselle-rdep/", 'Meuse': "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/meuse-rdep/",
-    'Morbihan': "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/morbihan-rdep/", 'Moselle' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/moselle-rdep/",
-    'Nièvre': "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/nievre-rdep/", 'Nord': "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/nord-rdep/",
-    'Oise' : "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/oise-rdep/", 'Orne' : "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/orne-rdep/",
-    'Pas de Calais': "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/pas-de-calais-rdep/", 'Puy-de-Dôme': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/puy-de-dome-rdep/",
-    'Pyrenees Atlantiques': "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/pyrenees-atlantiques-rdep/", 'Pyrenees Orientales' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/pyrenees-orientales-rdep/",
-    'Rhône': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/rhone-rdep/", 'Saône et Loire': "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/saone-et-loire-rdep/",
-    'Savoie': "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/savoie-rdep/", 'Sarthe' : "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/sarthe-rdep/",
-    'Seine Maritime': "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/seine-maritime-rdep/", 'Seine Saint Denis': "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/seine-saint-denis-rdep/",
-    'Seine et Marne' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/seine-et-marne-rdep/", 'Somme' : "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/somme-rdep/",
-    'Tarn': "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/tarn-rdep/", 'Tarn et Garonne' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/tarn-et-garonne-rdep/",
-    'Territoire de Belfort': "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/territoire-de-belfort-rdep/", 'Val d Oise' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/val-d-oise-rdep/",
-    'Val de Marne': "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/val-de-marne-rdep/", 'Var' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/var-rdep/",
-    'Vaucluse': "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/vaucluse-rdep/", 'Vendee': "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/vendee-rdep/",
-    'Vienne' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/vienne-rdep/", 'Vosges': "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/vosges-rdep/",
-    'Yonne': "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/yonne-rdep/", 'Yvelines' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/yvelines-rdep/"
-}
-
-#DepartementLinks but sorted by the number of the departement with the format 'Departement - number' : "link"
-departementLinks =  {
-    'Ain - 01' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/ain-rdep/", 'Aisne - 02' : "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/aisne-rdep/",
-    'Allier - 03' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/allier-rdep/", 'Alpes de Haute Provence - 04' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/alpes-de-haute-provence-rdep/",
-    'Hautes-Alpes - 05' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/hautes-alpes-rdep/", 'Alpes Maritimes - 06' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/alpes-maritimes-rdep/",
-    'Ardèche - 07' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/ardeche-rdep/", 'Ardennes - 08' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/ardennes-rdep/",
-    'Ariège - 09' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/ariege-rdep/", 'Aube - 10' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/aube-rdep/",
-    'Aude - 11' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/aude-rdep/", 'Aveyron - 12' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/aveyron-rdep/",
-    'Bouches du Rhône - 13' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/bouches-du-rhone-rdep/", 'Calvados - 14' : "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/calvados-rdep/",
-    'Cantal - 15' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/cantal-rdep/", 'Charente - 16' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/charente-rdep/",
-    'Charente Maritime - 17' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/charente-maritime-rdep/", 'Cher - 18' : "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/cher-rdep/",
-    'Corrèze - 19' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/correze-rdep/", 'Corse du Sud - 2A' : "https://www.verif.com/top/revenue-r0/france-rcoun/corse-rreg/corse-du-sud-rdep/",
-    'Haute Corse - 2B' : "https://www.verif.com/top/revenue-r0/france-rcoun/corse-rreg/haute-corse-rdep/", 'Côte d Or - 21' : "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/cote-d-or-rdep/",
-    'Côtes d Armor - 22' : "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/cote-d-armor-rdep/", 'Creuse - 23' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/creuse-rdep/",
-    'Dordogne - 24' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/dordogne-rdep/", 'Doubs - 25' : "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/doubs-rdep/",
-    'Drôme - 26' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/drome-rdep/", 'Eure - 27' : "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/eure-rdep/",
-    'Eure et Loir - 28' : "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/eure-et-loir-rdep/", 'Finistère - 29' : "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/finistere-rdep/",
-    'Gard - 30' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/gard-rdep/", 'Haute Garonne - 31' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/haute-garonne-rdep/",
-    'Gers - 32' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/gers-rdep/", 'Gironde - 33' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/gironde-rdep/",
-    'Hérault - 34' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/herault-rdep/", 'Ille et Vilaine - 35' : "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/ille-et-vilaine-rdep/",
-    'Indre - 36' : "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/indre-rdep/", 'Indre et Loire - 37' : "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/indre-et-loire-rdep/",
-    'Isère - 38' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/isere-rdep/", 'Jura - 39' : "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/jura-rdep/",
-    'Landes - 40' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/landes-rdep/", 'Loir et Cher - 41' : "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/loir-et-cher-rdep/",
-    'Loire - 42' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/loire-rdep/", 'Haute Loire - 43' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/haute-loire-rdep/",
-    'Loire Atlantique - 44' : "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/loire-atlantique-rdep/", 'Loiret - 45' : "https://www.verif.com/top/revenue-r0/france-rcoun/centre-val-de-loire-rreg/loiret-rdep/",
-    'Lot - 46' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/lot-rdep/", 'Lot et Garonne - 47' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/lot-et-garonne-rdep/",
-    'Lozère - 48' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/lozere-rdep/", 'Maine et Loire - 49' : "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/maine-et-loire-rdep/",
-    'Manche - 50' : "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/manche-rdep/", 'Marne - 51' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/marne-rdep/",
-    'Haute Marne - 52' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/haute-marne-rdep/", 'Mayenne - 53' : "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/mayenne-rdep/",
-    'Meurthe et Moselle - 54' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/meurthe-et-moselle-rdep/", 'Meuse - 55' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/meuse-rdep/",
-    'Morbihan - 56' : "https://www.verif.com/top/revenue-r0/france-rcoun/bretagne-rreg/morbihan-rdep/", 'Moselle - 57' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/moselle-rdep/",
-    'Nièvre - 58' : "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/nievre-rdep/", 'Nord - 59' : "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/nord-rdep/",
-    'Oise - 60' : "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/oise-rdep/", 'Orne - 61' : "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/orne-rdep/",
-    'Pas de Calais - 62' : "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/pas-de-calais-rdep/", 'Puy de Dôme - 63' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/puy-de-dome-rdep/",
-    'Pyrénées Atlantiques - 64' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/pyrenees-atlantiques-rdep/", 'Hautes Pyrénées - 65' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/hautes-pyrenees-rdep/",
-    'Pyrénées Orientales - 66' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/pyrenees-orientales-rdep/", 'Bas Rhin - 67' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/bas-rhin-rdep/",
-    'Haut Rhin - 68' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/haut-rhin-rdep/", 'Rhône - 69' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/rhone-rdep/",
-    'Haute Saône - 70' : "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/haute-saone-rdep/", 'Saône et Loire - 71' : "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/saone-et-loire-rdep/",
-    'Sarthe - 72' : "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/sarthe-rdep/", 'Savoie - 73' : "https://www.verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/savoie-rdep/",
-    'Haute Savoie - 74' : "https://verif.com/top/revenue-r0/france-rcoun/auvergne-rhone-alpes-rreg/haute-savoie-rdep/", 'Paris - 75' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/paris-rdep/",
-    'Seine Maritime - 76' : "https://www.verif.com/top/revenue-r0/france-rcoun/normandie-rreg/seine-maritime-rdep/", 'Seine et Marne - 77' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/seine-et-marne-rdep/",
-    'Yvelines - 78' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/yvelines-rdep/", 'Deux Sèvres - 79' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/deux-sevres-rdep/",
-    'Somme - 80' : "https://www.verif.com/top/revenue-r0/france-rcoun/hauts-de-france-rreg/somme-rdep/", 'Tarn - 81' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/tarn-rdep/",
-    'Tarn et Garonne - 82' : "https://www.verif.com/top/revenue-r0/france-rcoun/occitanie-rreg/tarn-et-garonne-rdep/", 'Var - 83' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/var-rdep/",
-    'Vaucluse - 84' : "https://www.verif.com/top/revenue-r0/france-rcoun/provence-alpes-cote-d-azur-rreg/vaucluse-rdep/", 'Vendée - 85' : "https://www.verif.com/top/revenue-r0/france-rcoun/pays-de-la-loire-rreg/vendee-rdep/",
-    'Vienne - 86' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/vienne-rdep/", 'Haute Vienne - 87' : "https://www.verif.com/top/revenue-r0/france-rcoun/nouvelle-aquitaine-rreg/haute-vienne-rdep/",
-    'Vosges - 88' : "https://www.verif.com/top/revenue-r0/france-rcoun/grand-est-rreg/vosges-rdep/", 'Yonne - 89' : "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/yonne-rdep/",
-    'Territoire de Belfort - 90' : "https://www.verif.com/top/revenue-r0/france-rcoun/bourgogne-franche-comte-rreg/territoire-de-belfort-rdep/", 'Essonne - 91' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/essonne-rdep/",
-    'Hauts de Seine - 92' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/hauts-de-seine-rdep/", 'Seine Saint Denis - 93' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/seine-saint-denis-rdep/",
-    'Val de Marne - 94' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/val-de-marne-rdep/", 'Val d Oise - 95' : "https://www.verif.com/top/revenue-r0/france-rcoun/ile-de-france-rreg/val-d-oise-rdep/",
-    'Guadeloupe - 971' : "https://www.verif.com/top/revenue-r0/france-rcoun/dom-rreg/guadeloupe-rdep/", 'Martinique - 972' : "https://www.verif.com/top/revenue-r0/france-rcoun/dom-rreg/martinique-rdep/",
-    'Guyane - 973' : "https://www.verif.com/top/revenue-r0/france-rcoun/dom-rreg/guyane-rdep/", 'La Réunion - 974' : "https://www.verif.com/top/revenue-r0/france-rcoun/dom-rreg/la-reunion-rdep/",
-    'Mayotte - 976' : "https://www.verif.com/top/revenue-r0/france-rcoun/dom-rreg/mayotte-rdep/"
-}
-
-
 """
 Const who use Path lib to get the relative path of the directory 'save' and 'savetab' in the project for 
 saving the csv file and the tabsheet file
@@ -179,7 +84,7 @@ if not csvPath.exists():
 if not tabPath.exists():
     tabPath.mkdir()
 
-def scrap(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->None:
+def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->None:
     print(f"Started to scrap at url {url}")
     """
     Get the html element of the page given, and parse it with BeautifulSoup (for the version, we will use only verif.com pages)
@@ -208,6 +113,8 @@ def scrap(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->N
     """
     companyNameQueue = Queue(size)
     companyDomainQueue = Queue(size)
+    companyCreationDateQueue = Queue(size)
+    
 
     """
     Those variables are used to go through the companies on the page, the index is used to get the company at the index
@@ -216,10 +123,7 @@ def scrap(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->N
     index = 0
     pageCounter = 0
 
-    fillQueue(companyNameQueue, companyDomainQueue, url, index, pageCounter, size)
-
-    #companyNameQueue.display()
-    #companyDomainQueue.display()
+    index, pageCounter = fillQueue(companyNameQueue, companyDomainQueue, companyCreationDateQueue, None, None, url, index, pageCounter, size)
     
     """
     Now we have all the informations needed to scrap the companies, we will start to search for the emails of the companies
@@ -237,7 +141,7 @@ def scrap(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->N
     ws.title = tabName
 
     assert not isinstance(ws, (ReadOnlyWorksheet, Chartsheet))
-    ws.append(["Nom de l'entreprise", "Nom de Domain", "Page de Contact", "Facebook", "Twitter", "Linkedin", "Email", "Score du mail", "Pattern de l'email"])
+    ws.append([f"Nom de l'entreprise", "Nom de Domain", "Date de création", "Page de Contact", "Facebook", "Twitter", "Linkedin", "Email", "Score du mail", "Pattern de l'email, {url},{index}, {pageCounter}"])
 
     """
     Open and initialize the csv file with the same informations as the tabsheet
@@ -245,12 +149,13 @@ def scrap(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->N
     but also can be modified with a text editor
     """
     csvFile = open(f"{csvPath}/{csvFileName}.csv", "w", encoding="utf-8")
-    csvFile.write("Nom de l'entreprise, Nom de Domain, Page de Contact, Facebook, Twitter, Linkedin, Email, Score du mail, Pattern de l'email\n")
+    csvFile.write(f"Nom de l'entreprise, Nom de Domain, Date de création, Page de Contact, Facebook, Twitter, Linkedin, Email, Score du mail, Pattern de l'email, {url}, {index}, {pageCounter}\n")
 
     data:"list[InfoScrap]" = [] 
     while(not companyNameQueue.is_empty()):
         company_name:str = companyNameQueue.dequeue()
         domain:str = companyDomainQueue.dequeue()
+        creationDate:str = companyCreationDateQueue.dequeue()
         networkScrap = companyNetwork(domain)
 
 
@@ -271,7 +176,7 @@ def scrap(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->N
 
         try:
             email = responseData['data']['emails'][0]['value']
-            score = 0
+            score = int(responseData['data']['emails'][0]['confidence'])
         except (IndexError, KeyError):
             emailScrap = None
         else: emailScrap = EmailScrap(email, score)
@@ -279,7 +184,7 @@ def scrap(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->N
         if not pattern and not emailScrap:
             print(f"Email not found for {company_name}")
 
-        data.append(InfoScrap(company_name, domain, networkScrap, pattern, emailScrap))
+        data.append(InfoScrap(company_name, domain, creationDate, networkScrap, pattern, emailScrap))
     
     for row in data:
         email = row.email
@@ -307,16 +212,230 @@ def scrap(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->N
             else: linkedin = network.linkedin
         
 
-        ws.append([row.company_name, row.domain, contactPage, facebook, twitter, linkedin, mail, score, row.emailPatern])
-        csvFile.write(f"{row.company_name}, {row.domain}, {contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
+        ws.append([row.company_name, row.domain, row.creationDate, contactPage, facebook, twitter, linkedin, mail, score, row.emailPatern])
+        csvFile.write(f"{row.company_name}, {row.domain}, {row.creationDate},{contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
     
     wb.save(f"{tabPath}/{tabFileName}.xlsx")
     csvFile.close()
 
     messagebox.showinfo("Information", "Le scrap des sociétés est effectué avec succès ! Vous pouvez retrouver les informations dans le fichier companies.xlsx et companies.csv dans le dossier savetab et save respectivement.")
+
+def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->None:
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    TotalCompaniesHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-titleDesktopH4 css-1ltityp")
+    assert TotalCompaniesHtmlElement is not None
+
+
+    TotalCompanies:int = int(extractFloatFromString(TotalCompaniesHtmlElement[0].text.strip()))
+    size:int = (TotalCompanies if number > TotalCompanies else number)
+
+    companyNameQueue = Queue(size)
+    companyDomainQueue = Queue(size)
+    companyCreationDateQueue = Queue(size)
+    companyDepartementQueue = Queue(size)
+    companyActivityQueue = Queue(size)
+
+    index = 0
+    pageCounter = 0
+
+    index, pageCounter = fillQueue(companyNameQueue, companyDomainQueue, companyCreationDateQueue, companyDepartementQueue , companyActivityQueue, url, index, pageCounter, size)
+
+    wb = Workbook()
+    ws = wb.active
+
+    assert ws is not None
+    ws.title = tabName
+    
+    assert not isinstance(ws, (ReadOnlyWorksheet, Chartsheet))
+    ws.append(["Nom de l'entreprise", "Nom de Domain", "Date de création", "Département", "Activité", "Page de Contact", "Facebook", "Twitter", "Linkedin", "Email", "Score du mail", "Pattern de l'email", f"{url}, {index}, {pageCounter}"])
+
+    csvFile = open(f"{csvPath}/{csvFileName}.csv", "w", encoding="utf-8")
+    csvFile.write(f"Nom de l'entreprise, Nom de Domain, Date de création, Département, Activité, Page de Contact, Facebook, Twitter, Linkedin, Email, Score du mail, Pattern de l'email, {url}, {index}, {pageCounter}\n")
+
+    data:"list[ActivityInfoScrap]" = []
+    while(not companyNameQueue.is_empty()):
+        company_name:str = companyNameQueue.dequeue()
+        domain:str = companyDomainQueue.dequeue()
+        creationDate:str = companyCreationDateQueue.dequeue()
+        departement:str = companyDepartementQueue.dequeue()
+        activity:str = companyActivityQueue.dequeue()
+        networkScrap = companyNetwork(domain)
+
+        response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
+        responseData = response.json()
+
+        try:
+            pattern = responseData['data']['pattern']
+        except (IndexError, KeyError):
+            pattern = "Non disponible"
+
+        try:
+            email = responseData['data']['emails'][0]['value']
+            score = int(responseData['data']['emails'][0]['confidence'])
+        except (IndexError, KeyError):
+            emailScrap = None
+        else: emailScrap = EmailScrap(email, score)
+
+        if not pattern and not emailScrap:
+            print(f"Email not found for {company_name}")
+
+        data.append(ActivityInfoScrap(company_name, domain, creationDate, departement, activity, networkScrap, pattern, emailScrap))
+
+    for row in data:
+        email = row.email
+        if email is None:
+            mail = "Non disponible"
+            score = "Score non disponible"
+        else: 
+            mail = email.email
+            score = email.score 
+
+        network = row.NetworkScrap
+        if network is None:
+            contactPage = "Non disponible"
+            facebook = "Non disponible"
+            twitter = "Non disponible"
+            linkedin = "Non disponible"
+        else: 
+            if network.contactPage is None: contactPage = "Non disponible"
+            else: contactPage = network.contactPage
+            if network.facebook is None: facebook = "Non disponible"
+            else: facebook = network.facebook
+            if network.twitter is None: twitter = "Non disponible"
+            else: twitter = network.twitter
+            if network.linkedin is None: linkedin = "Non disponible"
+            else: linkedin = network.linkedin
         
 
-    pass #temporary end of the function
+        ws.append([row.companyName, row.domain, row.creationDate, row.departement, row.activity, contactPage, facebook, twitter, linkedin, mail, score, row.emailPatern])
+        csvFile.write(f"{row.companyName}, {row.domain}, {row.creationDate},{row.departement}, {row.activity}, {contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
+    
+    wb.save(f"{tabPath}/{tabFileName}.xlsx")
+    csvFile.close()
+    messagebox.showinfo("Information", "Le scrap des sociétés est effectué avec succès ! Vous pouvez retrouver les informations dans le fichier companies.xlsx et companies.csv dans le dossier savetab et save respectivement.")
+
+def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
+    with open(f"save/{filename}", "r") as file:
+        #Get the first line of the file to get the url, the number of companies scrap and the number of the page
+        firstLine = file.readline().split(",")
+        if typeSearch:
+            url = firstLine[12]
+            index = int(firstLine[13])
+            pageCounter = int(firstLine[14])
+        else: 
+            url = firstLine[10]
+            index = int(firstLine[11])
+            pageCounter = int(firstLine[12])
+
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    TotalCompaniesHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-titleDesktopH4 css-1ltityp")
+    assert TotalCompaniesHtmlElement is not None
+
+    TotalCompanies:int = int(extractFloatFromString(TotalCompaniesHtmlElement[0].text.strip()))
+    size:int = (TotalCompanies if number > TotalCompanies else number)
+
+    companyName = Queue(size)
+    companyDomain = Queue(size)
+    companyCreationDate = Queue(size)
+    companyDepartement = None
+    companyActivity = None
+    
+    if typeSearch:
+        companyDepartement = Queue(size)
+        companyActivity = Queue(size)
+
+    print("before fillQueue")
+
+    fillQueue(companyName, companyDomain, companyCreationDate, companyDepartement, companyActivity, url, index, pageCounter, TotalCompanies, None)
+
+    print("after fillQueue")
+
+    companyName.display()
+    companyDomain.display()
+    companyCreationDate.display()
+
+
+    if typeSearch and companyDepartement is not None and companyActivity is not None:
+        companyDepartement.display()
+        companyActivity.display()
+
+    #Only complet csv file
+    csvFile = open(f"{csvPath}/{filename}", "a", encoding="utf-8")
+    data = []
+    while not companyName.is_empty():
+        company_name = companyName.dequeue()
+        domain = companyDomain.dequeue()
+        creationDate = companyCreationDate.dequeue()
+
+        if typeSearch and companyDepartement is not None and companyActivity is not None:
+            departement = companyDepartement.dequeue()
+            activity = companyActivity.dequeue()
+
+        networkScrap = companyNetwork(domain)
+
+        response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
+        responseData = response.json()
+
+        try:
+            pattern = responseData['data']['pattern']
+        except (IndexError, KeyError):
+            pattern = "Non disponible"
+
+        try:
+            email = responseData['data']['emails'][0]['value']
+            score = int(responseData['data']['emails'][0]['confidence'])
+        except (IndexError, KeyError):
+            emailScrap = None
+        else: emailScrap = EmailScrap(email, score)
+
+        if not pattern and not emailScrap:
+            print(f"Email not found for {company_name}")
+
+        if typeSearch:
+            data.append(ActivityInfoScrap(company_name, domain, creationDate, departement, activity, networkScrap, pattern, emailScrap))
+        else: 
+            data.append(InfoScrap(company_name, domain, creationDate, networkScrap, pattern, emailScrap))
+    
+    for row in data:
+        email = row.email
+        if email is None:
+            mail = "Non disponible"
+            score = "Score non disponible"
+        else: 
+            mail = email.email
+            score = email.score 
+
+        if typeSearch:
+            network = row.NetworkScrap
+        else : 
+            network = row.networkScrap
+        if network is None:
+            contactPage = "Non disponible"
+            facebook = "Non disponible"
+            twitter = "Non disponible"
+            linkedin = "Non disponible"
+        else: 
+            if network.contactPage is None: contactPage = "Non disponible"
+            else: contactPage = network.contactPage
+            if network.facebook is None: facebook = "Non disponible"
+            else: facebook = network.facebook
+            if network.twitter is None: twitter = "Non disponible"
+            else: twitter = network.twitter
+            if network.linkedin is None: linkedin = "Non disponible"
+            else: linkedin = network.linkedin
+        
+        if not typeSearch: 
+            csvFile.write(f"{row.company_name}, {row.domain}, {row.creationDate},{contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
+        else: 
+            csvFile.write(f"{row.companyName}, {row.domain}, {row.creationDate},{row.departement}, {row.activity}, {contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
+
+    csvFile.close()
+    messagebox.showinfo("Information", "Le scrap des sociétés est effectué avec succès ! Vous pouvez retrouver les informations dans le fichier companies.csv dans le dossier save.")
+    return
 
 def extractFloatFromString(string:str)->float:
     """
@@ -325,7 +444,9 @@ def extractFloatFromString(string:str)->float:
     """
     return float(''.join(filter(lambda x: x.isdigit() or x == '.', string)))
 
-def fillQueue(nameQueue: Queue, domainQueue: Queue, url:str, index:int, pageCounter:int, maxCompanyCount:int)->None:
+
+def fillQueue(nameQueue: Queue, domainQueue: Queue, creationDateQueue: Queue, departementQueue: "Queue|None", activityQueue: "Queue|None",
+              url:str, index:int, pageCounter:int, maxCompanyCount:int, comp=None)->"tuple[int, int]":
     """
     Fill the both queue while they aren't full, must fill the queue only 
     if the company isn't already in the queue and if the company has a domain
@@ -337,6 +458,12 @@ def fillQueue(nameQueue: Queue, domainQueue: Queue, url:str, index:int, pageCoun
         """
         if pageCounter*index >= maxCompanyCount:
             break
+
+        if comp is None:
+            response = requests.get(url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            companies = soup.find_all('tr', class_="MuiBox-root css-1vaqj3c")
+            comp = "companies"
 
         if index == 0:
             pageCounter += 1
@@ -360,33 +487,48 @@ def fillQueue(nameQueue: Queue, domainQueue: Queue, url:str, index:int, pageCoun
         
         soup = BeautifulSoup(response.text, 'html.parser')
         domainHtmlElement = soup.find('span', class_="MuiTypography-root MuiTypography-bodySmallMedium css-1ymqwc8")
+        creationDataHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-bodyDefaultMedium css-1185ny9")
 
-        
+
         if domainHtmlElement is None:
             index = (index+1)%250
             continue
         domain = domainHtmlElement.text
 
         domain:str = domainHtmlElement.find('a').text # type: ignore
-        
+
+        creationDate = "Non disponible"
+        for el in creationDataHtmlElement: #Only take the format "dd/mm/yyyy"
+            if "/" in el.text:
+                creationDate = el.text
+                break
+
         if not "http://" in domain: Tmpdomain = "http://" + domain
         elif not "https://" in domain : Tmpdomain = "https://"+ domain
 
         if domain in domainQueue.queue or not verifDNS(domain, Tmpdomain):
             index = (index+1)%250
             continue
-            
+        
+        if departementQueue is not None and activityQueue is not None:
+            companyName = companies[index].find_all('h3')[0].text
+            departement = companies[index].find_all('h3')[1].text
+            activity = companies[index].find_all('h3')[2].text
+        else : 
+            companyName = companies[index].find('h3').text.strip()
         """
         The Company name is in the h3 tag in the company page, so we need to get the text in the tag and add it in the queue
         When we add the company name in the queue, we need to add the domain in the domain queue too and then we can pass to the next company
         """
-        nameQueue.enqueue(companies[index].find('h3').text.strip())
+        nameQueue.enqueue(companyName)
         domainQueue.enqueue(domain)
+        creationDateQueue.enqueue(creationDate)
+        if departementQueue is not None and activityQueue is not None:
+            departementQueue.enqueue(departement)
+            activityQueue.enqueue(activity)
 
         index = (index+1)%250 #The number max of companies on a verif page
-    return
-
-
+    return index, pageCounter
 
 def createPageLink(defaultUrl:str, pageCounter:int)->str:
     """

@@ -1,14 +1,22 @@
-__author__ = "AlexLoup33 | github.com/AlexLoup33"
+__author__ = "Lou-Poueyou Alexandre | github.com/AlexLoup33"
 
 import tkinter as tk
 
-from scrapper import scrap, departementLinks
+from customtkinter import *
+from tkinter import messagebox, filedialog as fd
 from pathlib import Path
+
+from scrapper import scrapRevenue, scrapActivity, scrapFromFile, csvPath
+from globalVar import departementLinks, ActivityLinks
 
 light_gray = "#FAFAFA"
 green = "#AEEEE0"
 
 logoPath = Path(__file__).parent.joinpath("res")
+applogoPath = Path(__file__).parent.joinpath("res/applogo.png") #Scraping icons created by orvipixel - Flaticon - https://www.flaticon.com/free-icons/scraping
+
+departementLinksKey = list(departementLinks.keys())
+ActivityLinksKey = list(ActivityLinks.keys())
 
 class RoundedButton(tk.Canvas):
     def __init__(self, parent, text, textColor, bg, radius=25, padding=10, command=None, width=150, height=50, **kwargs):
@@ -104,74 +112,13 @@ def on_button_click():
 
 
 def App():
-    """
-    #Create a graphic interface
-    root = tk.Tk()
-    root.title("Saine Mail Scrapper")
-    root.geometry("500x500")
-    root.resizable(True, True)
-
-    #Create a label
-    label = tk.Label(root, text="Saine Mail Scrapper", font=("Arial", 15))
-    label.pack()
-
-    #Create a margin
-    margin = tk.Label(root, text="")
-    margin.pack()
-
-    #Create a combobox for the department, the program will take the value in the dict according to the department selected
-    departmentLabel = tk.Label(root, text="Département concerné")
-    departmentLabel.pack()
-
-    department = tk.StringVar()
-    department.set("Ain")
-    departmentMenu = tk.OptionMenu(root, department, *departementLinks.keys())
-    departmentMenu.pack()
-
-    #Create a slider for the number of companies who start from 1 to the number of companies
-    sliderLabel = tk.Label(root, text="Nombre d'entreprise à scraper")
-    sliderLabel.pack()
-    slider = tk.Entry(root, width=50)
-    slider.pack()
-
-
-
-    #Create an input for the name of the file csv
-    csvLabel = tk.Label(root, text="Nom du fichier csv")
-    csvLabel.pack()
-    name_csv = tk.Entry(root, width=50)
-    name_csv.pack()
-
-    #Create an input for the name of the tabsheet
-    tabLabel = tk.Label(root, text="Nom du tableur")
-    tabLabel.pack()
-    name_tab = tk.Entry(root, width=50)
-    name_tab.pack()
-
-    #Create an input for the name of the file tabsheet
-    fileLabel = tk.Label(root, text="Nom du fichier tableur")
-    fileLabel.pack()
-    name_file = tk.Entry(root, width=50)
-    name_file.pack()
-
-    def button_func():
-        try:
-            number = int(float(slider.get()))
-        except ValueError:
-            messagebox.showerror("Error", "Le nombre de sociétés doit être un nombre")
-            return
-        return scrap(departementLinks[department.get()], number, name_csv.get(), name_tab.get(), name_file.get())
-
-    #Create a button that scrap the companies, make a label appear when the function is done 
-    button = tk.Button(root, text="Scrap", command=button_func)
-    button.pack(pady=10)
-
-    root.mainloop()
-    """
     root = tk.Tk()
     root.geometry("1280x720")
     root.resizable(False, False)
-    root.title("Company Mail Scapper")
+    root.title("Scrapp.io")
+    
+    icon = tk.PhotoImage(file=applogoPath)
+    root.wm_iconphoto(False, icon)
 
     options_frame = tk.Frame(root, bg=light_gray)
 
@@ -213,40 +160,204 @@ def App():
             frame.destroy()
 
     def TopRevenuePage():
-        topRevenueFrame = tk.Frame(main_frame)
+        topRevenueFrame = tk.Frame(main_frame, background="white")
 
         canvasTitle = tk.Canvas(topRevenueFrame, width=250, height=100, bg="white", highlightthickness=0)
         title = tk.Label(canvasTitle, text="Recherche à partir des revenues", font=("CenturyGothic", 24), fg="black", bg="white")
+
+        #Create an transparant separator between the title and the option menu
+        separatorTitle = tk.Frame(topRevenueFrame, height=40, width=450, bg="white")
+
+        departement = tk.StringVar()
+        departement.set("Ain - 01")
+
+        departementMenu = CTkOptionMenu(topRevenueFrame, width=450, height= 50, fg_color=green, button_color=green, button_hover_color=green,
+                                        text_color="black", corner_radius=10, values=departementLinksKey, variable=departement)
         
+        separatorOptionM = tk.Frame(topRevenueFrame, height=40, width=450, bg="white")
+
+        numberEntry = CTkEntry(topRevenueFrame, width=450, height=50, border_color="white", fg_color=green,
+                               text_color="black", corner_radius=10, placeholder_text="Nombre d'entreprise à scraper") 
+        
+        separatorNumber = tk.Frame(topRevenueFrame, height=40, width=450, bg="white")
+
+        csvFileName = CTkEntry(topRevenueFrame, width=450, height=50, border_color="white", fg_color=green, 
+                               text_color="black", corner_radius=10, placeholder_text="Nom du fichier csv")
+
+        separatorCSV = tk.Frame(topRevenueFrame, height=40, width=450, bg="white")
+
+        tabName = CTkEntry(topRevenueFrame, width=450, height=50, border_color="white", fg_color=green, 
+                           text_color="black", corner_radius=10, placeholder_text="Nom du tableur")
+
+        separatorTab = tk.Frame(topRevenueFrame, height=40, width=450, bg="white")
+
+        fileName = CTkEntry(topRevenueFrame, width=450, height=50, border_color="white", fg_color=green,
+                                 text_color="black", corner_radius=10, placeholder_text="Nom du fichier tableur")
+
+        separatorFileName = tk.Frame(topRevenueFrame, height=40, width=450, bg="white")
+
+        def button_command():
+            try:
+                number = int(float(numberEntry.get()))
+            except ValueError:
+                messagebox.showerror("Error", "Le nombre de sociétés doit être un nombre") # type = ignore
+                return
+            return scrapRevenue(departementLinks[departement.get()], number, csvFileName.get(), tabName.get(), fileName.get())
+
+        scrapButton = CTkButton(topRevenueFrame, width=450, height=50, fg_color="white", bg_color="white",
+                                hover_color=green, border_color=green, border_width=2, text_color="black", corner_radius=10, text="Scrap", command=lambda: button_command())
+
         canvasTitle.pack()
         title.pack()
+        separatorTitle.pack()
+        departementMenu.pack()
+        separatorOptionM.pack()
+        numberEntry.pack()
+        separatorNumber.pack()
+        csvFileName.pack()
+        separatorCSV.pack()
+        tabName.pack()
+        separatorTab.pack()
+        fileName.pack()
+        separatorFileName.pack()
+        scrapButton.pack()
 
         topRevenueFrame.pack(pady=20)
 
     def ActivityPage():
-        activityFrame = tk.Frame(main_frame)
+        activityFrame = tk.Frame(main_frame, bg="white")
 
         canvasTitle = tk.Canvas(activityFrame, width=250, height=100, bg="white", highlightthickness=0)
         title = tk.Label(canvasTitle, text="Recherche à partir du domaine d'activité", font=("CenturyGothic", 24), fg="black", bg="white")
+
+        separatorTitle = tk.Frame(activityFrame, height=40, width=450, bg="white")
+
+        activity = tk.StringVar()
+        activity.set("Activité administrative et autres services de soutien aux entreprises")
+
+        departementMenu = CTkOptionMenu(activityFrame, width=450, height= 50, fg_color=green, button_color=green, button_hover_color=green,
+                                        text_color="black", corner_radius=10, values=ActivityLinksKey, variable=activity)
+        
+        separatorOptionM = tk.Frame(activityFrame, height=40, width=450, bg="white")
+
+        numberEntry = CTkEntry(activityFrame, width=450, height=50, border_color="white", fg_color=green,
+                               text_color="black", corner_radius=10, placeholder_text="Nombre d'entreprise à scraper") 
+        
+        separatorNumber = tk.Frame(activityFrame, height=40, width=450, bg="white")
+
+        csvFileName = CTkEntry(activityFrame, width=450, height=50, border_color="white", fg_color=green, 
+                               text_color="black", corner_radius=10, placeholder_text="Nom du fichier csv")
+
+        separatorCSV = tk.Frame(activityFrame, height=40, width=450, bg="white")
+
+        tabName = CTkEntry(activityFrame, width=450, height=50, border_color="white", fg_color=green, 
+                           text_color="black", corner_radius=10, placeholder_text="Nom du tableur")
+
+        separatorTab = tk.Frame(activityFrame, height=40, width=450, bg="white")
+
+        fileName = CTkEntry(activityFrame, width=450, height=50, border_color="white", fg_color=green,
+                                 text_color="black", corner_radius=10, placeholder_text="Nom du fichier tableur")
+
+        separatorFileName = tk.Frame(activityFrame, height=40, width=450, bg="white")
+
+        def button_command():
+            try:
+                number = int(float(numberEntry.get()))
+            except ValueError:
+                messagebox.showerror("Error", "Le nombre de sociétés doit être un nombre")
+                return
+            return scrapActivity(ActivityLinks[activity.get()], number, csvFileName.get(), tabName.get(), fileName.get())
+
+        scrapButton = CTkButton(activityFrame, width=450, height=50, fg_color="white", bg_color="white",
+                                hover_color=green, border_color=green, border_width=2, text_color="black", corner_radius=10, text="Scrap", command=lambda: button_command())
+
         canvasTitle.pack()
         title.pack()
+        separatorTitle.pack()
+        departementMenu.pack()
+        separatorOptionM.pack()
+        numberEntry.pack()
+        separatorNumber.pack()
+        csvFileName.pack()
+        separatorCSV.pack()
+        tabName.pack()
+        separatorTab.pack()
+        fileName.pack()
+        separatorFileName.pack()
+        scrapButton.pack()
 
         activityFrame.pack(pady=20)
 
     def FilePage():
-        fileFrame = tk.Frame(main_frame)
+        fileFrame = tk.Frame(main_frame, bg="white")
 
         canvasTitle = tk.Canvas(fileFrame, width=250, height=100, bg="white", highlightthickness=0)
         title = tk.Label(canvasTitle, text="Recherche à partir d'un fichier existant", font=("CenturyGothic", 24), fg="black", bg="white")
+        
+        separatorTitle = tk.Frame(fileFrame, height=40, width=450, bg="white")
+
+
+        switchAct = tk.BooleanVar()
+        switchAct.set(False)
+        switchActButton = CTkSwitch(fileFrame, text="Rouge : Revenue | Bleu : Activité", text_color="black", width=450, height=50, fg_color="red", bg_color="white",
+                                 button_color="#DCDCDC", button_hover_color="#DCDCDC", variable=switchAct, corner_radius=10)
+
+        separatorSwitchAct = tk.Frame(fileFrame, height=40, width=450, bg="white")
+
+        def select_file(): 
+            filetypes = [("CSV files", "*.csv")]
+
+            fname = fd.askopenfilename(filetypes=filetypes, title='Choisir un fichier CSV', initialdir=csvPath)
+
+            if fname:
+                compactFileName = Path(fname).name
+                fileEntry.configure(text=compactFileName)
+        
+        fileEntry = CTkButton(fileFrame, width=450, height=50, fg_color="white", bg_color="white",
+                                hover_color=green, border_color=green, border_width=2, text_color="black", corner_radius=10, text="Choisir un fichier", command=select_file)
+        
+        separatorFile = tk.Frame(fileFrame, width=40, height=30, bg="white")
+
+        numberEntry = CTkEntry(fileFrame, width=450, height=50, border_color="white", fg_color=green, text_color="black", 
+                               corner_radius=10, placeholder_text="Nombre d'entreprise à scraper")
+
+        separatorNumber = tk.Frame(fileFrame, width=40, height=250, bg="white")
+
+        def button_command():
+            try:
+                number = int(float(numberEntry.get()))
+                typeSearch: bool = switchAct.get()
+            except ValueError:
+                messagebox.showerror("Error", "Le nombre de sociétés doit être un nombre")
+                return
+            else: 
+                filename = fileEntry.cget("text")
+                return scrapFromFile(filename, number, typeSearch)
+
+        scrapButton = CTkButton(fileFrame, width=450, height=50, fg_color="white", bg_color="white",
+                                hover_color=green, border_color=green, border_width=2, text_color="black", corner_radius=10, text="Scrap", command=lambda: button_command())
+
         canvasTitle.pack()
         title.pack()
+        separatorTitle.pack()
+        switchActButton.pack()
+        separatorSwitchAct.pack()
+        fileEntry.pack()
+        separatorFile.pack()
+        numberEntry.pack()
+        separatorNumber.pack()
+        scrapButton.pack()
 
         fileFrame.pack(pady=20)
-    root.mainloop()
+    
+    TopRevenuePage()
 
+    root.mainloop()
 
 def main():
     App()
+    for file in Path(__file__).parent.joinpath("tmp_html").iterdir():
+        file.unlink() 
 
 if __name__ == "__main__":
     main()
