@@ -319,7 +319,8 @@ def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName
 def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
     with open(f"save/{filename}", "r") as file:
         #Get the first line of the file to get the url, the number of companies scrap and the number of the page
-        firstLine = file.readline().split(",")
+        lines = file.readlines()
+        firstLine = lines[0].split(", ")
         if typeSearch:
             url = firstLine[12]
             index = int(firstLine[13])
@@ -350,7 +351,7 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
 
     print("before fillQueue")
 
-    fillQueue(companyName, companyDomain, companyCreationDate, companyDepartement, companyActivity, url, index, pageCounter, TotalCompanies, None)
+    newIndex, newPageCounter = fillQueue(companyName, companyDomain, companyCreationDate, companyDepartement, companyActivity, url, index, pageCounter, TotalCompanies, None)
 
     print("after fillQueue")
 
@@ -363,9 +364,10 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
         companyDepartement.display()
         companyActivity.display()
 
-    #Only complet csv file
-    csvFile = open(f"{csvPath}/{filename}", "a", encoding="utf-8")
     data = []
+
+    #Only complet csv file
+    csvFile = open(f"{csvPath}/{filename}", "a+", encoding="utf-8")
     while not companyName.is_empty():
         company_name = companyName.dequeue()
         domain = companyDomain.dequeue()
@@ -429,11 +431,20 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
             else: linkedin = network.linkedin
         
         if not typeSearch: 
-            csvFile.write(f"{row.company_name}, {row.domain}, {row.creationDate},{contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
+            lines.append(f"{row.company_name}, {row.domain}, {row.creationDate},{contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
         else: 
-            csvFile.write(f"{row.companyName}, {row.domain}, {row.creationDate},{row.departement}, {row.activity}, {contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
-
+            lines.append(f"{row.companyName}, {row.domain}, {row.creationDate},{row.departement}, {row.activity}, {contactPage}, {facebook}, {twitter}, {linkedin}, {mail}, {score}, {row.emailPatern}\n")
     csvFile.close()
+
+    if typeSearch:
+        lines[0] = f"Nom de l'entreprise, Nom de Domain, Date de création, Département, Activité, Page de Contact, Facebook, Twitter, Linkedin, Email, Score du mail, Pattern de l'email, {url}, {newIndex}, {newPageCounter}\n"
+    else:
+        lines[0] = f"Nom de l'entreprise, Nom de Domain, Date de création, Page de Contact, Facebook, Twitter, Linkedin, Email, Score du mail, Pattern de l'email, {url}, {newIndex}, {newPageCounter}\n"
+
+    with open(f"save/{filename}", "w") as file:
+        file.writelines(lines)
+    file.close()
+
     messagebox.showinfo("Information", "Le scrap des sociétés est effectué avec succès ! Vous pouvez retrouver les informations dans le fichier companies.csv dans le dossier save.")
     return
 
