@@ -1,6 +1,7 @@
 # Cache or vsCode file
 __pycache__/
 .vscode/
+.DS_STORE
 
 # Save folder
 save/

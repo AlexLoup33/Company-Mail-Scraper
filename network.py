@@ -96,7 +96,6 @@ def findNetwork(url:str)->"NetworkScrap|None":
     print(f"LinkedIn: {linkedin}")
 
     looped: bool = False
-    """
     while (not facebook and not twitter and not linkedin):
         driver = webdriver.Chrome()
         driver.get(url)
@@ -107,10 +106,10 @@ def findNetwork(url:str)->"NetworkScrap|None":
     
         driver.quit()
 
-        
+        """
         The html page is already saved in the tmp_html folder, now we open the file and retry
         to find the informations desired (hope i found lmao)
-
+        """
         with open('tmp_html/'+getCompanyName(url)+'.html', 'r') as f:
             soup = BeautifulSoup(f, 'html.parser')
 
@@ -131,7 +130,6 @@ def findNetwork(url:str)->"NetworkScrap|None":
         if looped or (facebook or twitter or linkedin):
             break
         looped = True
-        """
 
     print(f"Traitement de la page {url} terminé.")
     print(f"Contact page: {contactPage}")
@@ -146,6 +144,7 @@ def findNetwork(url:str)->"NetworkScrap|None":
 Refactor the url by changing his extension because the url isn't valid
 Will test with a lot of extension to find a valid one
 """
+
 def refactorUrl(url:str)->str|None:
     if isValidPage(url):
         return url
