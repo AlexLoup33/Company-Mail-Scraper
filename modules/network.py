@@ -89,12 +89,6 @@ def findNetwork(url:str)->"NetworkScrap|None":
         else : #case where no social network are found
             pass
 
-
-    print(f"Contact page: {contactPage}")
-    print(f"Facebook: {facebook}")
-    print(f"Twitter: {twitter}")
-    print(f"LinkedIn: {linkedin}")
-
     looped: bool = False
     while (not facebook and not twitter and not linkedin):
         driver = webdriver.Chrome()
@@ -130,12 +124,6 @@ def findNetwork(url:str)->"NetworkScrap|None":
         if looped or (facebook or twitter or linkedin):
             break
         looped = True
-
-    print(f"Traitement de la page {url} terminé.")
-    print(f"Contact page: {contactPage}")
-    print(f"Facebook: {facebook}")
-    print(f"Twitter: {twitter}")
-    print(f"LinkedIn: {linkedin}", end="\n\n")
 
     return NetworkScrap(contactPage, facebook, twitter, linkedin)
 
@@ -207,7 +195,6 @@ def verifDNS(domain:str, url:str)->bool:
 def main():
     url = "www.jadelma.com"
     network = findNetwork(url)
-    print(network)
 
 if __name__ == "__main__":
     main()
