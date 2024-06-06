@@ -1,6 +1,7 @@
 __author__ = "Lou-Poueyou Alexandre | github.com/AlexLoup33"
 
 import requests
+import os
 
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -61,7 +62,7 @@ class Queue:
         for item in self.queue:
             print(item)
 
-api_key = "d4d29913091c9954368733ea3f29bbced2a8c63e"
+api_key = os.getenv("HUNTER_API_KEY")
 
 """
 Const who use Path lib to get the relative path of the directory 'save' and 'savetab' in the project for 
