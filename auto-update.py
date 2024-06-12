@@ -17,8 +17,9 @@ def getLatestRelease():
     """
     Get the latest release of the project on the github repository
     """
-    url = "https://api.github.com/repos/AlexLoup33/Company-Scrap/releases/latest"
+    url = "https://api.github.com/repos/AlexLoup33/Company-Mail-Scraper/releases/latest"
     response = requests.get(url)
+    print(response.text)
     if response.status_code == 200:
         return json.loads(response.text)["tag_name"]
     else:
