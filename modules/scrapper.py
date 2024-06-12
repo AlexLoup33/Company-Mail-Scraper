@@ -191,17 +191,18 @@ def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:
         The API of Hunter.io can find the email and the pattern of the email, 
         but also can find the social network of the company
         """
-        if networkScrap.twitter is None:
-            try : networkScrap.twitter = responseData['data']['twitter']
-            except (IndexError, KeyError): networkScrap.twitter = None
-        
-        if networkScrap.facebook is None:
-            try : networkScrap.facebook = responseData['data']['facebook']
-            except (IndexError, KeyError): networkScrap.facebook = None
-        
-        if networkScrap.linkedin is None:
-            try : networkScrap.linkedin = responseData['data']['linkedin']
-            except (IndexError, KeyError): networkScrap.linkedin = None
+        if networkScrap is not None:
+            if networkScrap.twitter is None:
+                try : networkScrap.twitter = responseData['data']['twitter']
+                except (IndexError, KeyError): pass
+            
+            if networkScrap.facebook is None:
+                try : networkScrap.facebook = responseData['data']['facebook']
+                except (IndexError, KeyError): pass
+            
+            if networkScrap.linkedin is None:
+                try : networkScrap.linkedin = responseData['data']['linkedin']
+                except (IndexError, KeyError): pass
         
 
         if not pattern and not emailScrap:
@@ -301,17 +302,18 @@ def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName
             emailScrap = None
         else: emailScrap = EmailScrap(email, score)
 
-        if networkScrap.twitter is None:
-            try : networkScrap.twitter = responseData['data']['twitter']
-            except (IndexError, KeyError): networkScrap.twitter = None
-        
-        if networkScrap.facebook is None:
-            try : networkScrap.facebook = responseData['data']['facebook']
-            except (IndexError, KeyError): networkScrap.facebook = None
-        
-        if networkScrap.linkedin is None:
-            try : networkScrap.linkedin = responseData['data']['linkedin']
-            except (IndexError, KeyError): networkScrap.linkedin = None
+        if networkScrap is not None:
+            if networkScrap.twitter is None:
+                try : networkScrap.twitter = responseData['data']['twitter']
+                except (IndexError, KeyError): pass
+            
+            if networkScrap.facebook is None:
+                try : networkScrap.facebook = responseData['data']['facebook']
+                except (IndexError, KeyError): pass
+            
+            if networkScrap.linkedin is None:
+                try : networkScrap.linkedin = responseData['data']['linkedin']
+                except (IndexError, KeyError): pass
 
         if not pattern and not emailScrap:
             print(f"Email not found for {company_name}")
@@ -438,17 +440,18 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
             emailScrap = None
         else: emailScrap = EmailScrap(email, score)
 
-        if networkScrap.twitter is None:
-            try : networkScrap.twitter = responseData['data']['twitter']
-            except (IndexError, KeyError): networkScrap.twitter = None
-        
-        if networkScrap.facebook is None:
-            try : networkScrap.facebook = responseData['data']['facebook']
-            except (IndexError, KeyError): networkScrap.facebook = None
-        
-        if networkScrap.linkedin is None:
-            try : networkScrap.linkedin = responseData['data']['linkedin']
-            except (IndexError, KeyError): networkScrap.linkedin = None
+        if networkScrap is not None:
+            if networkScrap.twitter is None:
+                try : networkScrap.twitter = responseData['data']['twitter']
+                except (IndexError, KeyError): pass
+            
+            if networkScrap.facebook is None:
+                try : networkScrap.facebook = responseData['data']['facebook']
+                except (IndexError, KeyError): pass
+            
+            if networkScrap.linkedin is None:
+                try : networkScrap.linkedin = responseData['data']['linkedin']
+                except (IndexError, KeyError): pass
 
         if not pattern and not emailScrap:
             print(f"Email not found for {company_name}")

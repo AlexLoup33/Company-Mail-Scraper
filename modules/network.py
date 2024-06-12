@@ -6,14 +6,32 @@ import whois
 
 from pathlib import Path
 from bs4 import BeautifulSoup
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 from selenium import webdriver
-
+"""
 class NetworkScrap(NamedTuple):
     contactPage: str | None
     facebook: str | None
-    twitter: str | None
+    twitter: Optional[str]
     linkedin: str | None
+
+    def __setAttribute__(self, attr, value):
+        if attr == "contactPage":
+            self.contactPage = value
+        elif attr == "facebook":
+            self.facebook = value
+        elif attr == "twitter":
+            self.twitter = value
+        elif attr == "linkedin":
+            self.linkedin = value
+"""
+class NetworkScrap:
+    def __init__(self, contact, facebook, twitter, linkedin) -> None:
+        self.contactPage = contact
+        self.facebook = facebook
+        self.twitter = twitter
+        self.linkedin = linkedin
+    
 
 tmpPath = Path(__file__).parent.parent.joinpath("tmp_html")
 
@@ -89,6 +107,8 @@ def findNetwork(url:str)->"NetworkScrap|None":
         else : #case where no social network are found
             pass
 
+
+    """
     looped: bool = False
     while (not facebook and not twitter and not linkedin):
         driver = webdriver.Chrome()
@@ -100,10 +120,9 @@ def findNetwork(url:str)->"NetworkScrap|None":
     
         driver.quit()
 
-        """
-        The html page is already saved in the tmp_html folder, now we open the file and retry
-        to find the informations desired (hope i found lmao)
-        """
+        #The html page is already saved in the tmp_html folder, now we open the file and retry
+        #to find the informations desired (hope i found lmao)
+        
         with open('tmp_html/'+getCompanyName(url)+'.html', 'r') as f:
             soup = BeautifulSoup(f, 'html.parser')
 
@@ -124,9 +143,9 @@ def findNetwork(url:str)->"NetworkScrap|None":
         if looped or (facebook or twitter or linkedin):
             break
         looped = True
-
+    """
     return NetworkScrap(contactPage, facebook, twitter, linkedin)
-
+    
 
 """
 Refactor the url by changing his extension because the url isn't valid
