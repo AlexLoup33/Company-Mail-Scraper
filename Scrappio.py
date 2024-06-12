@@ -196,13 +196,18 @@ def App():
 
         separatorFileName = tk.Frame(topRevenueFrame, height=40, width=450, bg="white")
 
+        switchMail = tk.BooleanVar()
+        switchMail.set(False)
+        switchMailButton = CTkSwitch(topRevenueFrame, text="Recherches des mails ?", text_color="black", width=450, height=50, 
+                                    fg_color="red", bg_color="white", button_color="#DCDCDC", button_hover_color="#DCDCDC", variable=switchMail, corner_radius=10)
+
         def button_command():
             try:
                 number = int(float(numberEntry.get()))
             except ValueError:
                 messagebox.showerror("Error", "Le nombre de sociétés doit être un nombre") # type = ignore
                 return
-            return scrapRevenue(departementLinks[departement.get()], number, csvFileName.get(), tabName.get(), fileName.get())
+            return scrapRevenue(departementLinks[departement.get()], number, csvFileName.get(), tabName.get(), fileName.get(), switchMail.get())
 
         scrapButton = CTkButton(topRevenueFrame, width=450, height=50, fg_color="white", bg_color="white",
                                 hover_color=green, border_color=green, border_width=2, text_color="black", corner_radius=10, text="Scrap", command=lambda: button_command())
@@ -220,6 +225,7 @@ def App():
         separatorTab.pack()
         fileName.pack()
         separatorFileName.pack()
+        switchMailButton.pack()
         scrapButton.pack()
 
         topRevenueFrame.pack(pady=20)
@@ -260,13 +266,18 @@ def App():
 
         separatorFileName = tk.Frame(activityFrame, height=40, width=450, bg="white")
 
+        switchMail = tk.BooleanVar()
+        switchMail.set(False)
+        switchMailButton = CTkSwitch(activityFrame, text="Recherches des mails ?", text_color="black", width=450, height=50,
+                                    fg_color="red", bg_color="white", button_color="#DCDCDC", button_hover_color="#DCDCDC", variable=switchMail, corner_radius=10)
+
         def button_command():
             try:
                 number = int(float(numberEntry.get()))
             except ValueError:
                 messagebox.showerror("Error", "Le nombre de sociétés doit être un nombre")
                 return
-            return scrapActivity(ActivityLinks[activity.get()], number, csvFileName.get(), tabName.get(), fileName.get())
+            return scrapActivity(ActivityLinks[activity.get()], number, csvFileName.get(), tabName.get(), fileName.get(), switchMail.get())
 
         scrapButton = CTkButton(activityFrame, width=450, height=50, fg_color="white", bg_color="white",
                                 hover_color=green, border_color=green, border_width=2, text_color="black", corner_radius=10, text="Scrap", command=lambda: button_command())
@@ -284,6 +295,7 @@ def App():
         separatorTab.pack()
         fileName.pack()
         separatorFileName.pack()
+        switchMailButton.pack()
         scrapButton.pack()
 
         activityFrame.pack(pady=20)
@@ -323,6 +335,11 @@ def App():
 
         separatorNumber = tk.Frame(fileFrame, width=40, height=250, bg="white")
 
+        switchMail = tk.BooleanVar()
+        switchMail.set(False)
+        switchMailButton = CTkSwitch(fileFrame, text="Recherches des mails", text_color="black", width=450, height=50,
+                                    fg_color="red", bg_color="white", button_color="#DCDCDC", button_hover_color="#DCDCDC", variable=switchMail, corner_radius=10)
+
         def button_command():
             try:
                 number = int(float(numberEntry.get()))
@@ -332,7 +349,7 @@ def App():
                 return
             else: 
                 filename = fileEntry.cget("text")
-                return scrapFromFile(filename, number, typeSearch)
+                return scrapFromFile(filename, number, typeSearch, switchMail.get())
 
         scrapButton = CTkButton(fileFrame, width=450, height=50, fg_color="white", bg_color="white",
                                 hover_color=green, border_color=green, border_width=2, text_color="black", corner_radius=10, text="Scrap", command=lambda: button_command())
@@ -346,6 +363,7 @@ def App():
         separatorFile.pack()
         numberEntry.pack()
         separatorNumber.pack()
+        switchMailButton.pack()
         scrapButton.pack()
 
         fileFrame.pack(pady=20)
@@ -357,7 +375,8 @@ def App():
 def main():
     App()
     for file in Path(__file__).parent.joinpath("tmp_html").iterdir():
-        file.unlink() 
+        file.unlink()
 
+    
 if __name__ == "__main__":
     main()

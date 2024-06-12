@@ -88,7 +88,7 @@ if not csvPath.exists():
 if not tabPath.exists():
     tabPath.mkdir()
 
-def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->None:
+def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str, mailBool:bool)->None:
     print(f"Started to scrap at url {url}")
     """
     Get the html element of the page given, and parse it with BeautifulSoup (for the version, we will use only verif.com pages)
@@ -162,51 +162,55 @@ def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:
         creationDate:str = companyCreationDateQueue.dequeue()
         networkScrap = companyNetwork(domain)
 
+        if mailBool:
 
-        """
-        Email scrap section, we will search for email with the hunter.io API, 
-        the API will return the email of the company, a score and a email pattern
-        """
-        response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
-        responseData = response.json()
+            """
+            Email scrap section, we will search for email with the hunter.io API, 
+            the API will return the email of the company, a score and a email pattern
+            """
+            response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
+            responseData = response.json()
 
 
-        """
-        Don't process the email & score with the pattern if the API doesn't find any email but find a pattern
-        """
-        try:
-            pattern = responseData['data']['pattern']
-        except (IndexError, KeyError):
-            pattern = "Non disponible"
+            """
+            Don't process the email & score with the pattern if the API doesn't find any email but find a pattern
+            """
+            try:
+                pattern = responseData['data']['pattern']
+            except (IndexError, KeyError):
+                pattern = "Non disponible"
 
-        try:
-            email = responseData['data']['emails'][0]['value']
-            score = int(responseData['data']['emails'][0]['confidence'])
-        except (IndexError, KeyError):
+            try:
+                email = responseData['data']['emails'][0]['value']
+                score = int(responseData['data']['emails'][0]['confidence'])
+            except (IndexError, KeyError):
+                emailScrap = None
+            else: emailScrap = EmailScrap(email, score)
+
+
+            """
+            The API of Hunter.io can find the email and the pattern of the email, 
+            but also can find the social network of the company
+            """
+            if networkScrap is not None:
+                if networkScrap.twitter is None:
+                    try : networkScrap.twitter = responseData['data']['twitter']
+                    except (IndexError, KeyError): pass
+                
+                if networkScrap.facebook is None:
+                    try : networkScrap.facebook = responseData['data']['facebook']
+                    except (IndexError, KeyError): pass
+                
+                if networkScrap.linkedin is None:
+                    try : networkScrap.linkedin = responseData['data']['linkedin']
+                    except (IndexError, KeyError): pass
+            
+
+            if not pattern and not emailScrap:
+                print(f"Email not found for {company_name}")
+        else:
             emailScrap = None
-        else: emailScrap = EmailScrap(email, score)
-
-
-        """
-        The API of Hunter.io can find the email and the pattern of the email, 
-        but also can find the social network of the company
-        """
-        if networkScrap is not None:
-            if networkScrap.twitter is None:
-                try : networkScrap.twitter = responseData['data']['twitter']
-                except (IndexError, KeyError): pass
-            
-            if networkScrap.facebook is None:
-                try : networkScrap.facebook = responseData['data']['facebook']
-                except (IndexError, KeyError): pass
-            
-            if networkScrap.linkedin is None:
-                try : networkScrap.linkedin = responseData['data']['linkedin']
-                except (IndexError, KeyError): pass
-        
-
-        if not pattern and not emailScrap:
-            print(f"Email not found for {company_name}")
+            pattern = "Non disponible"
 
         data.append(InfoScrap(company_name, domain, creationDate, networkScrap, pattern, emailScrap))
     
@@ -244,7 +248,7 @@ def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:
 
     messagebox.showinfo("Information", "Le scrap des sociétés est effectué avec succès ! Vous pouvez retrouver les informations dans le fichier companies.xlsx et companies.csv dans le dossier savetab et save respectivement.")
 
-def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str)->None:
+def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName:str, mailBool:bool)->None:
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -287,36 +291,55 @@ def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName
         activity:str = companyActivityQueue.dequeue()
         networkScrap = companyNetwork(domain)
 
-        response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
-        responseData = response.json()
+        if mailBool:
 
-        try:
-            pattern = responseData['data']['pattern']
-        except (IndexError, KeyError):
-            pattern = "Non disponible"
+            """
+            Email scrap section, we will search for email with the hunter.io API, 
+            the API will return the email of the company, a score and a email pattern
+            """
+            response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
+            responseData = response.json()
 
-        try:
-            email = responseData['data']['emails'][0]['value']
-            score = int(responseData['data']['emails'][0]['confidence'])
-        except (IndexError, KeyError):
+
+            """
+            Don't process the email & score with the pattern if the API doesn't find any email but find a pattern
+            """
+            try:
+                pattern = responseData['data']['pattern']
+            except (IndexError, KeyError):
+                pattern = "Non disponible"
+
+            try:
+                email = responseData['data']['emails'][0]['value']
+                score = int(responseData['data']['emails'][0]['confidence'])
+            except (IndexError, KeyError):
+                emailScrap = None
+            else: emailScrap = EmailScrap(email, score)
+
+
+            """
+            The API of Hunter.io can find the email and the pattern of the email, 
+            but also can find the social network of the company
+            """
+            if networkScrap is not None:
+                if networkScrap.twitter is None:
+                    try : networkScrap.twitter = responseData['data']['twitter']
+                    except (IndexError, KeyError): pass
+                
+                if networkScrap.facebook is None:
+                    try : networkScrap.facebook = responseData['data']['facebook']
+                    except (IndexError, KeyError): pass
+                
+                if networkScrap.linkedin is None:
+                    try : networkScrap.linkedin = responseData['data']['linkedin']
+                    except (IndexError, KeyError): pass
+            
+
+            if not pattern and not emailScrap:
+                print(f"Email not found for {company_name}")
+        else:
             emailScrap = None
-        else: emailScrap = EmailScrap(email, score)
-
-        if networkScrap is not None:
-            if networkScrap.twitter is None:
-                try : networkScrap.twitter = responseData['data']['twitter']
-                except (IndexError, KeyError): pass
-            
-            if networkScrap.facebook is None:
-                try : networkScrap.facebook = responseData['data']['facebook']
-                except (IndexError, KeyError): pass
-            
-            if networkScrap.linkedin is None:
-                try : networkScrap.linkedin = responseData['data']['linkedin']
-                except (IndexError, KeyError): pass
-
-        if not pattern and not emailScrap:
-            print(f"Email not found for {company_name}")
+            pattern = "Non disponible"
 
         data.append(ActivityInfoScrap(company_name, domain, creationDate, departement, activity, networkScrap, pattern, emailScrap))
 
@@ -354,7 +377,7 @@ def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName
     messagebox.showinfo("Information", "Le scrap des sociétés est effectué avec succès ! Vous pouvez retrouver les informations dans le fichier companies.xlsx et companies.csv dans le dossier savetab et save respectivement.")
 
 
-def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
+def scrapFromFile(filename: str, number: int, typeSearch: bool, mailBool:bool)->None:
     """
     Get the first line of the file to get the url, the number of companies scrap 
     and the number of the page
@@ -425,36 +448,55 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
 
         networkScrap = companyNetwork(domain)
 
-        response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
-        responseData = response.json()
+        if mailBool:
 
-        try:
-            pattern = responseData['data']['pattern']
-        except (IndexError, KeyError):
-            pattern = "Non disponible"
+            """
+            Email scrap section, we will search for email with the hunter.io API, 
+            the API will return the email of the company, a score and a email pattern
+            """
+            response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
+            responseData = response.json()
 
-        try:
-            email = responseData['data']['emails'][0]['value']
-            score = int(responseData['data']['emails'][0]['confidence'])
-        except (IndexError, KeyError):
+
+            """
+            Don't process the email & score with the pattern if the API doesn't find any email but find a pattern
+            """
+            try:
+                pattern = responseData['data']['pattern']
+            except (IndexError, KeyError):
+                pattern = "Non disponible"
+
+            try:
+                email = responseData['data']['emails'][0]['value']
+                score = int(responseData['data']['emails'][0]['confidence'])
+            except (IndexError, KeyError):
+                emailScrap = None
+            else: emailScrap = EmailScrap(email, score)
+
+
+            """
+            The API of Hunter.io can find the email and the pattern of the email, 
+            but also can find the social network of the company
+            """
+            if networkScrap is not None:
+                if networkScrap.twitter is None:
+                    try : networkScrap.twitter = responseData['data']['twitter']
+                    except (IndexError, KeyError): pass
+                
+                if networkScrap.facebook is None:
+                    try : networkScrap.facebook = responseData['data']['facebook']
+                    except (IndexError, KeyError): pass
+                
+                if networkScrap.linkedin is None:
+                    try : networkScrap.linkedin = responseData['data']['linkedin']
+                    except (IndexError, KeyError): pass
+            
+
+            if not pattern and not emailScrap:
+                print(f"Email not found for {company_name}")
+        else:
             emailScrap = None
-        else: emailScrap = EmailScrap(email, score)
-
-        if networkScrap is not None:
-            if networkScrap.twitter is None:
-                try : networkScrap.twitter = responseData['data']['twitter']
-                except (IndexError, KeyError): pass
-            
-            if networkScrap.facebook is None:
-                try : networkScrap.facebook = responseData['data']['facebook']
-                except (IndexError, KeyError): pass
-            
-            if networkScrap.linkedin is None:
-                try : networkScrap.linkedin = responseData['data']['linkedin']
-                except (IndexError, KeyError): pass
-
-        if not pattern and not emailScrap:
-            print(f"Email not found for {company_name}")
+            pattern = "Non disponible"
 
         if typeSearch:
             data.append(ActivityInfoScrap(company_name, domain, creationDate, departement, activity, networkScrap, pattern, emailScrap))
