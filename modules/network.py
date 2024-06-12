@@ -108,7 +108,7 @@ def findNetwork(url:str)->"NetworkScrap|None":
             pass
 
 
-    """
+    
     looped: bool = False
     while (not facebook and not twitter and not linkedin):
         driver = webdriver.Chrome()
@@ -143,7 +143,7 @@ def findNetwork(url:str)->"NetworkScrap|None":
         if looped or (facebook or twitter or linkedin):
             break
         looped = True
-    """
+    
     return NetworkScrap(contactPage, facebook, twitter, linkedin)
     
 
