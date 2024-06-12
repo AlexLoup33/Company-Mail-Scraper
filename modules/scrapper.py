@@ -10,6 +10,7 @@ from openpyxl import Workbook
 from openpyxl.worksheet._read_only import ReadOnlyWorksheet 
 from openpyxl.chartsheet.chartsheet import Chartsheet
 from tkinter import messagebox
+from dotenv import load_dotenv
 from modules.network import findNetwork, verifDNS, NetworkScrap
 
 class EmailScrap(NamedTuple):
@@ -62,6 +63,8 @@ class Queue:
         for item in self.queue:
             print(item)
 
+envPath = Path(__file__).parent.parent.joinpath("venv") /".env"
+envVar = load_dotenv(envPath)
 api_key = os.getenv("HUNTER_API_KEY")
 
 """
@@ -161,11 +164,12 @@ def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:
 
 
         """
-        Email scrap section, we will search for email with the hunter.io API, the API will return the email of the company, a score and a email pattern
+        Email scrap section, we will search for email with the hunter.io API, 
+        the API will return the email of the company, a score and a email pattern
         """
-
         response = requests.get(f"https://api.hunter.io/v2/domain-search?domain={domain}&api_key={api_key}")
         responseData = response.json()
+
 
         """
         Don't process the email & score with the pattern if the API doesn't find any email but find a pattern
@@ -181,6 +185,24 @@ def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:
         except (IndexError, KeyError):
             emailScrap = None
         else: emailScrap = EmailScrap(email, score)
+
+
+        """
+        The API of Hunter.io can find the email and the pattern of the email, 
+        but also can find the social network of the company
+        """
+        if networkScrap.twitter is None:
+            try : networkScrap.twitter = responseData['data']['twitter']
+            except (IndexError, KeyError): networkScrap.twitter = None
+        
+        if networkScrap.facebook is None:
+            try : networkScrap.facebook = responseData['data']['facebook']
+            except (IndexError, KeyError): networkScrap.facebook = None
+        
+        if networkScrap.linkedin is None:
+            try : networkScrap.linkedin = responseData['data']['linkedin']
+            except (IndexError, KeyError): networkScrap.linkedin = None
+        
 
         if not pattern and not emailScrap:
             print(f"Email not found for {company_name}")
@@ -279,6 +301,18 @@ def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName
             emailScrap = None
         else: emailScrap = EmailScrap(email, score)
 
+        if networkScrap.twitter is None:
+            try : networkScrap.twitter = responseData['data']['twitter']
+            except (IndexError, KeyError): networkScrap.twitter = None
+        
+        if networkScrap.facebook is None:
+            try : networkScrap.facebook = responseData['data']['facebook']
+            except (IndexError, KeyError): networkScrap.facebook = None
+        
+        if networkScrap.linkedin is None:
+            try : networkScrap.linkedin = responseData['data']['linkedin']
+            except (IndexError, KeyError): networkScrap.linkedin = None
+
         if not pattern and not emailScrap:
             print(f"Email not found for {company_name}")
 
@@ -317,9 +351,13 @@ def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName
     csvFile.close()
     messagebox.showinfo("Information", "Le scrap des sociétés est effectué avec succès ! Vous pouvez retrouver les informations dans le fichier companies.xlsx et companies.csv dans le dossier savetab et save respectivement.")
 
+
 def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
+    """
+    Get the first line of the file to get the url, the number of companies scrap 
+    and the number of the page
+    """
     with open(f"save/{filename}", "r") as file:
-        #Get the first line of the file to get the url, the number of companies scrap and the number of the page
         lines = file.readlines()
         firstLine = lines[0].split(", ")
         if typeSearch:
@@ -334,7 +372,8 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    TotalCompaniesHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-titleDesktopH4 css-1ltityp")
+    TotalCompaniesHtmlElement = soup.find_all('span', 
+                                            class_="MuiTypography-root MuiTypography-titleDesktopH4 css-1ltityp")
     assert TotalCompaniesHtmlElement is not None
 
     TotalCompanies:int = int(extractFloatFromString(TotalCompaniesHtmlElement[0].text.strip()))
@@ -352,7 +391,9 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
 
     print("before fillQueue")
 
-    newIndex, newPageCounter = fillQueue(companyName, companyDomain, companyCreationDate, companyDepartement, companyActivity, url, index, pageCounter, TotalCompanies, None)
+    newIndex, newPageCounter = fillQueue(companyName, companyDomain, companyCreationDate, 
+                                         companyDepartement, companyActivity, url, 
+                                         index, pageCounter, TotalCompanies, None)
 
     print("after fillQueue")
 
@@ -367,7 +408,9 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
 
     data = []
 
-    #Only complet csv file
+    """
+    For the search by a file, it only use csv file because the only type of input is a csv file
+    """
     csvFile = open(f"{csvPath}/{filename}", "a+", encoding="utf-8")
     while not companyName.is_empty():
         company_name = companyName.dequeue()
@@ -394,6 +437,18 @@ def scrapFromFile(filename: str, number: int, typeSearch: bool)->None:
         except (IndexError, KeyError):
             emailScrap = None
         else: emailScrap = EmailScrap(email, score)
+
+        if networkScrap.twitter is None:
+            try : networkScrap.twitter = responseData['data']['twitter']
+            except (IndexError, KeyError): networkScrap.twitter = None
+        
+        if networkScrap.facebook is None:
+            try : networkScrap.facebook = responseData['data']['facebook']
+            except (IndexError, KeyError): networkScrap.facebook = None
+        
+        if networkScrap.linkedin is None:
+            try : networkScrap.linkedin = responseData['data']['linkedin']
+            except (IndexError, KeyError): networkScrap.linkedin = None
 
         if not pattern and not emailScrap:
             print(f"Email not found for {company_name}")
@@ -568,6 +623,7 @@ hide some informations on their website.
 Some personal search can be needed to find the informations of the company,if the program doesn't find them
 
 TO-DO: Find a solution for page like "https://cdiscount.com" where i can't scrap any informations
+DONE : Use selenium library to skip the page with a cookie banner or captcha
 """
 def companyNetwork(domain:str)->"NetworkScrap|None":
     return findNetwork(domain)
