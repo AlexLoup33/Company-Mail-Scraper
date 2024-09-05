@@ -103,7 +103,7 @@ def scrapRevenue(url:str, number:int, csvFileName:str, tabName:str, tabFileName:
     Also check if the element exist on the page by shuting down the function it if it's None because it's mean the page isn't
     a verif.com page or a good one to scrap
     """
-    TotalCompaniesHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-titleDesktopH4 css-1ltityp")
+    TotalCompaniesHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-titleDesktopH4 css-iq6vpo")
     assert TotalCompaniesHtmlElement is not None
 
 
@@ -252,7 +252,7 @@ def scrapActivity(url:str, number:int, csvFileName:str, tabName:str, tabFileName
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    TotalCompaniesHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-titleDesktopH4 css-1ltityp")
+    TotalCompaniesHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-titleDesktopH4 css-iq6vpo")
     assert TotalCompaniesHtmlElement is not None
 
 
@@ -582,12 +582,14 @@ def fillQueue(nameQueue: Queue, domainQueue: Queue, creationDateQueue: Queue, de
             url = createPageLink(url, pageCounter)
             response = requests.get(url)
             soup = BeautifulSoup(response.text, 'html.parser')
-            companies = soup.find_all('tr', class_="MuiBox-root css-1vaqj3c")
+            print(f"Companies = {companies}")
         
         """
         Get the relative link of the company page on verif.com and combine it with the base url to get the full link
         """
+
         companyLink = companies[index].find('a')['href']
+        print(f"Company Link = {companyLink}")
         fullLink = "https://www.verif.com" + companyLink
 
         """
@@ -598,8 +600,8 @@ def fillQueue(nameQueue: Queue, domainQueue: Queue, creationDateQueue: Queue, de
         response = requests.get(fullLink)
         
         soup = BeautifulSoup(response.text, 'html.parser')
-        domainHtmlElement = soup.find('span', class_="MuiTypography-root MuiTypography-bodySmallMedium css-1ymqwc8")
-        creationDataHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-bodyDefaultMedium css-1185ny9")
+        domainHtmlElement = soup.find('span', class_="MuiTypography-root MuiTypography-bodySmallMedium css-1qxjrxm")
+        creationDataHtmlElement = soup.find_all('span', class_="MuiTypography-root MuiTypography-bodyDefaultMedium css-1nkgecf")
 
 
         if domainHtmlElement is None:

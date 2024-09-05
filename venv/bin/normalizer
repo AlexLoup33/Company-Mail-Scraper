@@ -1,4 +1,4 @@
-#!/Users/alexloup/Documents/code/Thesanei/Company-Mail-Scraper/venv/bin/python
+#!/home/alexloup-laptop/Documents/code/Company-Mail-Scraper/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -21,3 +21,4 @@ if __name__ == "__main__":
     install("selenium")
     install("python-whois")
     install("customtkinter")
+    install("python-dotenv")
